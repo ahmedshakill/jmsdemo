@@ -12,9 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MessageController {
 
-    @Autowired
-    DispatcherService dispatcherService;
+    private final DispatcherService dispatcherService;
+    private final DummyDataService dummyDataService;
 
+
+    public MessageController(DispatcherService dispatcherService, DummyDataService dummyDataService) {
+        this.dispatcherService = dispatcherService;
+        this.dummyDataService = dummyDataService;
+    }
 
 
     @PostMapping(value="/send")
@@ -23,10 +28,11 @@ public class MessageController {
         return new ResponseEntity<>("Message : " + message, HttpStatus.OK);
     }
 
-//    @PostMapping(value="/generate")
-//    public ResponseEntity<String> generate(/*@RequestBody String message*/){
-//
-//        return new ResponseEntity<>("Generating Data " , HttpStatus.OK);
-//    }
+    @PostMapping(value = "/generate")
+    public ResponseEntity<String> generate() {
+        dummyDataService.generateAndStoreDummyData();
+        dummyDataService.generateAndStoreDummySales();
+        return new ResponseEntity<>("Generating Data ", HttpStatus.OK);
+    }
 
 }

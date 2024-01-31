@@ -7,7 +7,6 @@ import jms.app.repository.SalesRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -22,9 +21,10 @@ public class DummyDataService {
     }
 
     public void generateAndStoreDummyData(){
+        System.out.println("Gen Prod");
         String[] productNames = {"Product1", "Product2", "Product3", "Product4", "Product5", "Product6", "Product7", "Product8", "Product9", "Product10"};
         String[] categories = {"Electronics", "Clothing", "Books", "Home Appliances", "Toys"};
-        double[] prices = {50.0, 30.0, 20.0, 100.0, 10.0};
+        int[] prices = {50, 30, 20, 100, 10};
 
         for (int i = 0; i < 10; i++) {
             Product product = new Product();
@@ -43,7 +43,7 @@ public class DummyDataService {
             for (Product product : products){
                 Sales sales = new Sales();
                 sales.setDate(date);
-                sales.setProductId(product.getId());
+                sales.setProduct(product);
                 sales.setQuantity(random.nextInt(10)+1);
                 salesRepository.save(sales);
             }

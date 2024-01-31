@@ -1,20 +1,20 @@
 package jms.app.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
-public class Sales {
+public class Sales implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private LocalDate date;
-    private long productId;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Product product;
     private int quantity;
 
     public LocalDate getDate() {
@@ -25,12 +25,12 @@ public class Sales {
         this.date = date;
     }
 
-    public long getProductId() {
-        return productId;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductId(long productId) {
-        this.productId = productId;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public int getQuantity() {
@@ -39,5 +39,15 @@ public class Sales {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "Sales{" +
+                "id=" + id +
+                ", date=" + date +
+                ", product=" + product.toString() +
+                ", quantity=" + quantity +
+                '}';
     }
 }

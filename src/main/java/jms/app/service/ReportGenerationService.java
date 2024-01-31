@@ -1,60 +1,60 @@
 package jms.app.service;
 
+import com.lowagie.text.DocumentException;
+import jms.app.entity.Sales;
 import jms.app.repository.SalesRepository;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Paths;
+import java.util.List;
 
 
 @Service
 public class ReportGenerationService {
 
     private final SalesRepository salesRepository ;
-
-    public ReportGenerationService(SalesRepository salesRepository) {
+    private final TemplateEngine templateEngine;
+    private final DispatcherService dispatcherService;
+    public ReportGenerationService(SalesRepository salesRepository, TemplateEngine templateEngine, DispatcherService dispatcherService) {
         this.salesRepository = salesRepository;
+        this.templateEngine = templateEngine;
+        this.dispatcherService = dispatcherService;
     }
 
-    public void generateReport() throws IOException {
-        System.out.println("Report Generation Service");
+    public void generateReport(){
+        List<Sales> salesList =  salesRepository.findAll();
 
-       String report =  salesRepository.findAll().toString();
+        try {
+            Context context = new Context();
+            context.setVariable("salesList",salesList);
 
-        PDDocument document = new PDDocument();
-        PDPage page = document.getPage(1);
-        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+            String processedHtml = templateEngine.process("pdf/template",context);
 
-        //Begin the Content stream
-        contentStream.beginText();
+            String fileName= "report.pdf";
+            String pdfOutputDirectory = "src/main/resources/pdfs";
+            var pdfFilePath = Paths.get(pdfOutputDirectory, fileName);
 
-        //Setting the font to the Content stream
-        contentStream.setFont(PDType1Font.TIMES_ROMAN, 12);
+            try(OutputStream outputStream = new FileOutputStream(pdfFilePath.toFile())) {
+                ITextRenderer iTextRenderer = new ITextRenderer();
+                iTextRenderer.setDocumentFromString(processedHtml);
+                iTextRenderer.layout();
+                iTextRenderer.createPDF(outputStream,false);
+                iTextRenderer.finishPDF();
 
-        //Setting the position for the line
-        contentStream.newLineAtOffset(25, 500);
+                // Send message to notify completion
+                dispatcherService.sendMessage("ReportGenerated");
+            }
 
-        String text = "This is the sample document and we are adding content to it.";
-
-        //Adding text in the form of string
-        contentStream.showText(report);
-
-        //Ending the content stream
-        contentStream.endText();
-
-        System.out.println("Content added");
-
-        //Closing the content stream
-        contentStream.close();
-        document.save("~/Documents");
-        document.close();
-
-        //TODO : Save report into pdf, handle paging
-
-
+        }
+        catch (IOException | DocumentException e){
+            System.out.println("failed to generate report");
+        }
     }
+
 }
