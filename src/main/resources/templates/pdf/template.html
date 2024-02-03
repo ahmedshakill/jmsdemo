@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Yearly Report PDF Template</title>
+</head>
+<body>
+<h1>Yearly Report</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Month</th>
+        <th>Sale</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="sales : ${salesList}">
+        <td th:text="${sales.date.month}"></td>
+<!--        <td th:text="${sales.product.name}"></td>-->
+<!--        <td th:text="${sales.product.category}"></td>-->
+<!--        <td th:text="${sales.product.price}"></td>-->
+        <td th:text="${sales.quantity}"></td>
+
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
+
